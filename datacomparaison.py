@@ -104,17 +104,47 @@ if all_series:
         options=series_names,
         default=series_names  # By default, all series are selected
     )
+from scipy.interpolate import make_interp_spline
+
+# Function to smooth the data
+def smooth_curve(frequencies, values, num_points=300):
+    """
+    Smooth the curve using spline interpolation.
+    
+    Parameters:
+    - frequencies: Original frequency values (x-axis).
+    - values: Original absorption values (y-axis).
+    - num_points: Number of points for the smoothed curve.
+    
+    Returns:
+    - smoothed_freq: Smoothed frequency values.
+    - smoothed_values: Smoothed absorption values.
+    """
+    # Remove NaN values for proper interpolation
+    valid_indices = ~np.isnan(values)
+    frequencies = frequencies[valid_indices]
+    values = values[valid_indices]
+
+    # Generate more points for a smooth curve
+    smoothed_freq = np.linspace(frequencies.min(), frequencies.max(), num_points)
+    spline = make_interp_spline(frequencies, values, k=3)  # Cubic spline
+    smoothed_values = spline(smoothed_freq)
+    
+    return smoothed_freq, smoothed_values
 
     # Filter selected series
     selected_series = [series for series in all_series if series["name"] in selected_series_names]
-
     # Generate a single graph for all selected series
     fig, ax = plt.subplots(figsize=(12, 8))
     for series in selected_series:
-        ax.plot(frequencies, series["values"], label=series["name"], marker="o")
-
+        # Smooth the data
+        smoothed_freq, smoothed_values = smooth_curve(frequencies, series["values"])
+        
+        # Plot the smoothed curve
+        ax.plot(smoothed_freq, smoothed_values, label=series["name"], marker="o")
+    
     # Customize the graph
-    ax.set_title("Absorption Curves")
+    ax.set_title("Absorption Curves (Selected Series)")
     ax.set_xscale("log")
     ax.set_xticks(frequencies)
     ax.get_xaxis().set_major_formatter(plt.ScalarFormatter())
@@ -122,10 +152,9 @@ if all_series:
     ax.set_ylabel("Absorption Coefficient")
     ax.legend(loc="best", fontsize=10)
     ax.grid(True, which="both", linestyle="--", linewidth=0.5)
-
+    
     # Display the graph in Streamlit
     st.pyplot(fig)
-
     # Function to save the graph as a PDF
     def save_as_pdf(fig):
         pdf_buffer = BytesIO()
