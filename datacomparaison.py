@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import streamlit as st
 
-# Configurer l'application Streamlit
+# Configuration de l'application Streamlit
 st.set_page_config(
     page_title="Analyse Acoustique Interactive",
     page_icon=":chart_with_upwards_trend:",
@@ -18,13 +18,13 @@ frequencies = np.array([
     6300, 8000, 10000
 ])
 
-# Fonction pour charger des fichiers Excel, avec prise en charge des formats .xls et .xlsx
+# Fonction pour charger des fichiers Excel
 def load_excel(file):
     """
     Charge un fichier Excel, prenant en charge les formats .xls et .xlsx.
     """
     try:
-        # Détecter le format du fichier
+        # Détecte le format du fichier
         if file.name.endswith(".xls"):
             df = pd.read_excel(file, sheet_name="Macro", engine="xlrd", header=None)
         else:
@@ -47,11 +47,16 @@ def extract_data(df):
             (8, "I1", "K3:K20"), (12, "M1", "O3:O20"),
             (16, "Q1", "S3:S20"), (20, "U1", "W3:W20")
         ]:
+            # Lire le nom de la série
             name = df.iloc[0, col_start]
-            values = df.iloc[2:20, col_start + 2].values
 
-            # Vérifie si toutes les valeurs sont numériques
-            if np.issubdtype(values.dtype, np.number) and not np.isnan(values).all():
+            # Lire les valeurs (en évitant les erreurs non numériques comme #DIV/0!)
+            values = pd.to_numeric(
+                df.iloc[2:20, col_start + 2], errors="coerce"
+            ).values  # `coerce` transforme les erreurs en NaN
+
+            # Vérifie si au moins une valeur est numérique
+            if not np.isnan(values).all():
                 extracted_data.append({"name": name, "values": values})
 
         return extracted_data
