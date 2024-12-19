@@ -4,41 +4,41 @@ import matplotlib.pyplot as plt
 import streamlit as st
 from io import BytesIO
 
-# Configuration de l'application Streamlit
+# Streamlit application configuration
 st.set_page_config(
-    page_title="Analyse Acoustique Interactive",
+    page_title="Interactive Acoustic Analysis",
     page_icon=":chart_with_upwards_trend:",
     layout="centered",
     initial_sidebar_state="expanded"
 )
 
-# Liste des fréquences prédéfinies
+# Predefined frequency list
 frequencies = np.array([
     200, 250, 315, 400, 500, 630, 800, 1000,
     1250, 1600, 2000, 2500, 3150, 4000, 5000,
     6300, 8000, 10000
 ])
 
-# Fonction pour charger des fichiers Excel
+# Function to load Excel files
 def load_excel(file):
     """
-    Charge un fichier Excel, prenant en charge les formats .xls et .xlsx.
+    Load an Excel file, supporting both .xls and .xlsx formats.
     """
     try:
-        # Détecte le format du fichier
+        # Detect file format
         if file.name.endswith(".xls"):
             df = pd.read_excel(file, sheet_name="Macro", engine="xlrd", header=None)
         else:
             df = pd.read_excel(file, sheet_name="Macro", engine="openpyxl", header=None)
         return df
     except Exception as e:
-        st.error(f"Erreur lors de la lecture du fichier : {e}")
+        st.error(f"Error reading the file: {e}")
         return None
 
-# Fonction pour extraire des données
+# Function to extract data
 def extract_data(df):
     """
-    Extrait les séries valides du DataFrame.
+    Extract valid series from the DataFrame.
     """
     extracted_data = []
 
@@ -48,18 +48,18 @@ def extract_data(df):
         (16, "Q1", "S3:S20"), (20, "U1", "W3:W20")
     ]:
         try:
-            # Lire le nom de la série
+            # Read the series name
             name = df.iloc[0, col_start]
 
-            # Lire les valeurs (en évitant les erreurs non numériques comme #DIV/0!)
+            # Read the values (avoiding non-numeric errors like #DIV/0!)
             values = pd.to_numeric(
                 df.iloc[2:20, col_start + 2], errors="coerce"
-            ).values  # `coerce` transforme les erreurs en NaN
+            ).values  # `coerce` turns errors into NaN
 
-            # Vérifie si au moins une valeur est numérique
+            # Check if at least one value is numeric
             if not np.isnan(values).all():
                 extracted_data.append({
-                    "name": name,  # Utilise uniquement le nom de l'échantillon
+                    "name": name,  # Use only the sample name
                     "values": values
                 })
         except Exception:
@@ -67,91 +67,91 @@ def extract_data(df):
 
     return extracted_data
 
-# Téléchargement de fichiers
+# File upload
 uploaded_files = st.sidebar.file_uploader(
-    "Importez vos fichiers Excel (.xls ou .xlsx)",
+    "Upload your Excel files (.xls or .xlsx)",
     type=["xls", "xlsx"],
     accept_multiple_files=True
 )
 
-# Stocker toutes les séries extraites
+# Store all extracted series
 all_series = []
 
-# Charger les fichiers et extraire les données
+# Load files and extract data
 if uploaded_files:
     for file in uploaded_files:
-        st.subheader(f"Données extraites de : {file.name}")
+        st.subheader(f"Extracted data from: {file.name}")
 
-        # Charger le fichier
+        # Load the file
         df = load_excel(file)
         if df is None:
             continue
 
-        # Extraire les données valides
+        # Extract valid data
         extracted_data = extract_data(df)
 
-        # Ajouter les séries au tableau global
+        # Add the series to the global list
         all_series.extend(extracted_data)
 
-# Afficher les options de sélection si des séries valides existent
+# Display selection options if valid series exist
 if all_series:
-    # Liste des noms des séries disponibles
+    # List of available series names
     series_names = [series["name"] for series in all_series]
 
-    # Permettre à l'utilisateur de sélectionner les séries à afficher
+    # Allow users to select which series to display
     selected_series_names = st.sidebar.multiselect(
-        "Choisissez les séries à afficher",
+        "Choose series to display",
         options=series_names,
-        default=series_names  # Par défaut, toutes les séries sont sélectionnées
+        default=series_names  # By default, all series are selected
     )
 
-    # Filtrer les séries sélectionnées
+    # Filter selected series
     selected_series = [series for series in all_series if series["name"] in selected_series_names]
 
-    # Générer un graphique unique pour toutes les séries sélectionnées
+    # Generate a single graph for all selected series
     fig, ax = plt.subplots(figsize=(12, 8))
     for series in selected_series:
         ax.plot(frequencies, series["values"], label=series["name"], marker="o")
 
-    # Personnalisation du graphique
-    ax.set_title("Courbes d'absorption (Séries sélectionnées)")
+    # Customize the graph
+    ax.set_title("Absorption Curves (Selected Series)")
     ax.set_xscale("log")
     ax.set_xticks(frequencies)
     ax.get_xaxis().set_major_formatter(plt.ScalarFormatter())
-    ax.set_xlabel("Fréquence (Hz)")
-    ax.set_ylabel("Coefficient d'absorption")
+    ax.set_xlabel("Frequency (Hz)")
+    ax.set_ylabel("Absorption Coefficient")
     ax.legend(loc="best", fontsize=10)
     ax.grid(True, which="both", linestyle="--", linewidth=0.5)
 
-    # Afficher le graphique dans Streamlit
+    # Display the graph in Streamlit
     st.pyplot(fig)
 
-    # Fonction pour enregistrer le graphique au format PDF
+    # Function to save the graph as a PDF
     def save_as_pdf(fig):
         pdf_buffer = BytesIO()
         fig.savefig(pdf_buffer, format="pdf")
         pdf_buffer.seek(0)
         return pdf_buffer
 
-    # Fonction pour enregistrer le graphique au format JPEG
+    # Function to save the graph as a JPEG
     def save_as_jpeg(fig):
         jpeg_buffer = BytesIO()
         fig.savefig(jpeg_buffer, format="jpeg", dpi=300)
         jpeg_buffer.seek(0)
         return jpeg_buffer
 
-    # Ajouter des boutons de téléchargement
+    # Add download buttons
     st.download_button(
-        label="Télécharger le graphique en PDF",
+        label="Download the graph as PDF",
         data=save_as_pdf(fig),
-        file_name="graphique_absorption.pdf",
+        file_name="absorption_graph.pdf",
         mime="application/pdf"
     )
     st.download_button(
-        label="Télécharger le graphique en JPEG",
+        label="Download the graph as JPEG",
         data=save_as_jpeg(fig),
-        file_name="graphique_absorption.jpeg",
+        file_name="absorption_graph.jpeg",
         mime="image/jpeg"
     )
 else:
-    st.info("Veuillez importer au moins un fichier Excel contenant des séries valides pour commencer l'analyse.")
+    st.info("Please upload at least one Excel file with valid series to start the analysis.")
