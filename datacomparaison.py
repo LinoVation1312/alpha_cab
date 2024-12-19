@@ -114,7 +114,7 @@ if all_series:
         ax.plot(frequencies, series["values"], label=series["name"], marker="o")
 
     # Customize the graph
-    ax.set_title("Absorption Curves (Selected Series)")
+    ax.set_title("Absorption Curves")
     ax.set_xscale("log")
     ax.set_xticks(frequencies)
     ax.get_xaxis().set_major_formatter(plt.ScalarFormatter())
