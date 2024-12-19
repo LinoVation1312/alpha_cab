@@ -105,7 +105,7 @@ if all_series:
     )
 
     # Function to smooth the data with logarithmic interpolation
-    def smooth_curve(frequencies, values, num_points=40):
+    def smooth_curve(frequencies, values, num_points=20):
         """
         Smooth the curve using spline interpolation on a logarithmic scale.
         
