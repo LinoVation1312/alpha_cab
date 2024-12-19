@@ -104,10 +104,10 @@ if all_series:
         default=series_names  # By default, all series are selected
     )
 
-    # Function to smooth the data
+    # Function to smooth the data with logarithmic interpolation
     def smooth_curve(frequencies, values, num_points=300):
         """
-        Smooth the curve using spline interpolation.
+        Smooth the curve using spline interpolation on a logarithmic scale.
         
         Parameters:
         - frequencies: Original frequency values (x-axis).
@@ -123,10 +123,16 @@ if all_series:
         frequencies = frequencies[valid_indices]
         values = values[valid_indices]
 
-        # Generate more points for a smooth curve
-        smoothed_freq = np.linspace(frequencies.min(), frequencies.max(), num_points)
-        spline = make_interp_spline(frequencies, values, k=3)  # Cubic spline
-        smoothed_values = spline(smoothed_freq)
+        # Logarithmic interpolation (log scale for frequency)
+        log_frequencies = np.log(frequencies)  # Take the logarithm of the frequencies
+        smoothed_log_freq = np.linspace(log_frequencies.min(), log_frequencies.max(), num_points)
+        
+        # Cubic spline interpolation on the log scale
+        spline = make_interp_spline(log_frequencies, values, k=3)
+        smoothed_values = spline(smoothed_log_freq)
+        
+        # Convert back to the frequency scale (exponentiate the smoothed log frequencies)
+        smoothed_freq = np.exp(smoothed_log_freq)
         
         return smoothed_freq, smoothed_values
 
