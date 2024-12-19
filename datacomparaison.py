@@ -35,7 +35,7 @@ def load_excel(file):
         return None
 
 # Fonction pour extraire des données
-def extract_data(df, file_name):
+def extract_data(df):
     """
     Extrait les séries valides du DataFrame.
     """
@@ -58,8 +58,7 @@ def extract_data(df, file_name):
             # Vérifie si au moins une valeur est numérique
             if not np.isnan(values).all():
                 extracted_data.append({
-                    "file": file_name,
-                    "name": f"{file_name} - {name}",  # Inclut le nom du fichier dans le label
+                    "name": name,  # Utilise uniquement le nom de l'échantillon
                     "values": values
                 })
         except Exception:
@@ -88,7 +87,7 @@ if uploaded_files:
             continue
 
         # Extraire les données valides
-        extracted_data = extract_data(df, file.name)
+        extracted_data = extract_data(df)
 
         # Ajouter les séries au tableau global
         all_series.extend(extracted_data)
