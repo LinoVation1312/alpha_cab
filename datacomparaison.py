@@ -14,11 +14,9 @@ st.set_page_config(
 )
 
 # Predefined frequency list
-frequencies = np.array([
-    200, 250, 315, 400, 500, 630, 800, 1000,
+frequencies = np.array([200, 250, 315, 400, 500, 630, 800, 1000,
     1250, 1600, 2000, 2500, 3150, 4000, 5000,
-    6300, 8000, 10000
-])
+    6300, 8000, 10000])
 
 # Function to load Excel files
 def load_excel(file):
@@ -68,23 +66,6 @@ def extract_data(df):
 
     return extracted_data
 
-# Function to smooth the data
-def smooth_curve(frequencies, values, num_points=300):
-    """
-    Smooth the curve using spline interpolation.
-    """
-    # Remove NaN values for proper interpolation
-    valid_indices = ~np.isnan(values)
-    frequencies = frequencies[valid_indices]
-    values = values[valid_indices]
-
-    # Generate more points for a smooth curve
-    smoothed_freq = np.linspace(frequencies.min(), frequencies.max(), num_points)
-    spline = make_interp_spline(frequencies, values, k=3)  # Cubic spline
-    smoothed_values = spline(smoothed_freq)
-    
-    return smoothed_freq, smoothed_values
-
 # File upload
 uploaded_files = st.sidebar.file_uploader(
     "Upload your Excel files (.xls or .xlsx)",
@@ -122,6 +103,32 @@ if all_series:
         options=series_names,
         default=series_names  # By default, all series are selected
     )
+
+    # Function to smooth the data
+    def smooth_curve(frequencies, values, num_points=300):
+        """
+        Smooth the curve using spline interpolation.
+        
+        Parameters:
+        - frequencies: Original frequency values (x-axis).
+        - values: Original absorption values (y-axis).
+        - num_points: Number of points for the smoothed curve.
+        
+        Returns:
+        - smoothed_freq: Smoothed frequency values.
+        - smoothed_values: Smoothed absorption values.
+        """
+        # Remove NaN values for proper interpolation
+        valid_indices = ~np.isnan(values)
+        frequencies = frequencies[valid_indices]
+        values = values[valid_indices]
+
+        # Generate more points for a smooth curve
+        smoothed_freq = np.linspace(frequencies.min(), frequencies.max(), num_points)
+        spline = make_interp_spline(frequencies, values, k=3)  # Cubic spline
+        smoothed_values = spline(smoothed_freq)
+        
+        return smoothed_freq, smoothed_values
 
     # Filter selected series
     selected_series = [series for series in all_series if series["name"] in selected_series_names]
@@ -175,5 +182,6 @@ if all_series:
         file_name="absorption_graph.jpeg",
         mime="image/jpeg"
     )
+
 else:
     st.info("Please upload at least one Excel file with valid series to start the analysis.")
