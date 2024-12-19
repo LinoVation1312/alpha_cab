@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import streamlit as st
+from io import BytesIO
 
 # Configuration de l'application Streamlit
 st.set_page_config(
@@ -124,5 +125,33 @@ if all_series:
 
     # Afficher le graphique dans Streamlit
     st.pyplot(fig)
+
+    # Fonction pour enregistrer le graphique au format PDF
+    def save_as_pdf(fig):
+        pdf_buffer = BytesIO()
+        fig.savefig(pdf_buffer, format="pdf")
+        pdf_buffer.seek(0)
+        return pdf_buffer
+
+    # Fonction pour enregistrer le graphique au format JPEG
+    def save_as_jpeg(fig):
+        jpeg_buffer = BytesIO()
+        fig.savefig(jpeg_buffer, format="jpeg", dpi=300)
+        jpeg_buffer.seek(0)
+        return jpeg_buffer
+
+    # Ajouter des boutons de téléchargement
+    st.download_button(
+        label="Télécharger le graphique en PDF",
+        data=save_as_pdf(fig),
+        file_name="graphique_absorption.pdf",
+        mime="application/pdf"
+    )
+    st.download_button(
+        label="Télécharger le graphique en JPEG",
+        data=save_as_jpeg(fig),
+        file_name="graphique_absorption.jpeg",
+        mime="image/jpeg"
+    )
 else:
     st.info("Veuillez importer au moins un fichier Excel contenant des séries valides pour commencer l'analyse.")
