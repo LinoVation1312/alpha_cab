@@ -11,10 +11,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Titre et configuration de la barre latérale
-st.title("Outil d'Analyse Acoustique Interactive")
-st.sidebar.title("Configuration")
-
 # Liste des fréquences prédéfinies
 frequencies = np.array([
     200, 250, 315, 400, 500, 630, 800, 1000,
@@ -22,14 +18,28 @@ frequencies = np.array([
     6300, 8000, 10000
 ])
 
-# Fonction pour charger et extraire des données
-def load_and_extract_data(file):
+# Fonction pour charger des fichiers Excel, avec prise en charge des formats .xls et .xlsx
+def load_excel(file):
     """
-    Charge et extrait les données des séries dans la feuille 'Macro' d'un fichier Excel.
-    Ignore les séries avec des valeurs non numériques.
+    Charge un fichier Excel, prenant en charge les formats .xls et .xlsx.
     """
     try:
-        df = pd.read_excel(file, sheet_name="Macro", header=None)
+        # Détecter le format du fichier
+        if file.name.endswith(".xls"):
+            df = pd.read_excel(file, sheet_name="Macro", engine="xlrd", header=None)
+        else:
+            df = pd.read_excel(file, sheet_name="Macro", engine="openpyxl", header=None)
+        return df
+    except Exception as e:
+        st.error(f"Erreur lors de la lecture du fichier : {e}")
+        return None
+
+# Fonction pour extraire des données
+def extract_data(df):
+    """
+    Extrait les séries valides du DataFrame.
+    """
+    try:
         extracted_data = []
 
         for col_start, name_cell, values_range in [
@@ -45,15 +55,14 @@ def load_and_extract_data(file):
                 extracted_data.append({"name": name, "values": values})
 
         return extracted_data
-
     except Exception as e:
-        st.error(f"Erreur lors de la lecture du fichier : {e}")
+        st.error(f"Erreur lors de l'extraction des données : {e}")
         return []
 
 # Téléchargement de fichiers
 uploaded_files = st.sidebar.file_uploader(
-    "Importez vos fichiers Excel (format .xlsx)", 
-    type=["xlsx"], 
+    "Importez vos fichiers Excel (.xls ou .xlsx)",
+    type=["xls", "xlsx"],
     accept_multiple_files=True
 )
 
@@ -62,8 +71,13 @@ if uploaded_files:
     for file in uploaded_files:
         st.subheader(f"Données extraites de : {file.name}")
 
+        # Charger le fichier
+        df = load_excel(file)
+        if df is None:
+            continue
+
         # Extraire les données valides
-        extracted_data = load_and_extract_data(file)
+        extracted_data = extract_data(df)
 
         # Si aucune série valide
         if not extracted_data:
