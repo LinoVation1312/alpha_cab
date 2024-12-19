@@ -1,43 +1,49 @@
-# Outil interactif d'analyse acoustique
+# Interactive Acoustic Analysis
 
 ## Description
 
-Ce projet propose un outil interactif d'analyse acoustique utilisant **Streamlit**. Il permet de comparer les courbes d'absorption acoustique à partir de données contenues dans deux fichiers Excel. L'application permet à l'utilisateur de télécharger ces fichiers, de sélectionner des paramètres (épaisseur et densité), et de visualiser les courbes d'absorption sous forme de graphiques. De plus, l'utilisateur peut télécharger le graphique généré au format PDF.
+This project provides an interactive tool for acoustic analysis of absorption coefficients at different frequencies using data from Excel files. The app allows users to upload Excel files containing acoustic data, visualize absorption curves, and smooth them using spline interpolation. It also offers the option to download the graphs in PDF or JPEG formats.
 
-## Fonctionnalités
+### Key Features:
+- **Upload Excel Files**: The application supports `.xls` and `.xlsx` formats.
+- **Interactive Plotting**: Choose which series to display and visualize absorption curves.
+- **Smoothing**: Interpolation on a logarithmic frequency scale to smooth the curves.
+- **Download Graphs**: Download the resulting graphs in PDF or JPEG formats.
 
-- **Téléchargement de fichiers Excel** : Permet de télécharger deux fichiers Excel contenant des données acoustiques.
-- **Sélection de paramètres** : L'utilisateur peut choisir l'épaisseur et la densité des matériaux pour ajuster les courbes d'absorption.
-- **Comparaison visuelle** : Affiche les courbes d'absorption des deux fichiers Excel dans un graphique pour comparaison.
-- **Téléchargement du graphique** : Permet de télécharger le graphique comparatif au format PDF.
+## How It Works
 
-URL Vers l'appli : **https://kundtpy.streamlit.app/**
+1. **Upload Files**: Upload one or more Excel files that contain acoustic data. The app will automatically extract relevant series.
+2. **Select Series**: Once the data is extracted, you can select which series to visualize.
+3. **Smooth Curves**: The app uses cubic spline interpolation to smooth the absorption curves. The interpolation takes place on a logarithmic frequency scale to ensure better visualization of the data, especially in higher frequencies.
+4. **Download Options**: After the graph is generated, you can download it as either a PDF or a JPEG file.
 
-Utilisation
-Télécharger les fichiers Excel : Cliquez sur les boutons "Télécharger le premier fichier Excel" et "Télécharger le deuxième fichier Excel" pour importer les données de vos fichiers Excel.
+## Requirements
 
-Sélectionner les paramètres : Utilisez les menus déroulants pour choisir l'épaisseur et la densité du matériau que vous souhaitez analyser.
+To run the app locally, you need to have the following libraries installed:
 
-Voir les courbes d'absorption : Les courbes d'absorption acoustique des deux fichiers seront tracées en fonction des paramètres sélectionnés.
+- `numpy`
+- `pandas`
+- `matplotlib`
+- `streamlit`
+- `scipy`
 
-Télécharger le graphique : Un bouton vous permet de télécharger le graphique comparatif sous forme de fichier PDF.
+You can install these dependencies by running:
 
-Structure du code
-load_data_from_excel(file) : Fonction qui charge les données depuis un fichier Excel et extrait les fréquences, les épaisseurs, les densités et les coefficients d'absorption.
-save_as_pdf(fig) : Fonction qui sauvegarde le graphique généré sous forme de fichier PDF.
-L'application utilise Matplotlib pour générer les graphiques et Streamlit pour l'interface utilisateur interactive.
-Exemple de structure des fichiers Excel
-Les fichiers Excel doivent contenir les données suivantes :
+```bash
+pip install numpy pandas matplotlib streamlit scipy
+```
 
-La première colonne pour les fréquences (en Hz).
-Les autres colonnes pour les coefficients d'absorption pour différentes combinaisons d'épaisseur et de densité.
+## App Link
 
-Voici une capture d'écran de l'interface de l'application :
+You can access the live version of the app at the following link:  
+[Interactive Acoustic Analysis App](https://github.com/LinoVation1312/alpha_cab/)
 
+## License
 
-Contributions
-Les contributions sont les bienvenues ! Si vous avez des suggestions ou des améliorations à proposer, n'hésitez pas à ouvrir une issue ou à soumettre une pull request.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-Licence
-Ce projet est sous licence MIT. Consultez le fichier LICENSE pour plus d'informations.
+## Acknowledgements
 
+- **Streamlit**: For creating a simple way to build interactive web apps in Python.
+- **Scipy**: For providing advanced interpolation functions.
+- **Matplotlib**: For visualizing the data.
