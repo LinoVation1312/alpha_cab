@@ -105,7 +105,7 @@ if all_series:
     )
 
     # Function to smooth the data with logarithmic interpolation
-    def smooth_curve(frequencies, values, num_points=50):
+    def smooth_curve(frequencies, values, num_points=30):
         """
         Smooth the curve using spline interpolation on a logarithmic scale.
         
@@ -146,7 +146,7 @@ if all_series:
         smoothed_freq, smoothed_values = smooth_curve(frequencies, series["values"])
         
         # Plot the smoothed curve
-        ax.plot(smoothed_freq, smoothed_values, label=series["name"], marker="o")
+        ax.plot(smoothed_freq, smoothed_values, label=series["name"], marker="none")
     
     # Customize the graph
     ax.set_title("Absorption Curves (Selected Series)")
